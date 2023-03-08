@@ -1,31 +1,12 @@
-const Seneca = require('seneca')
+const Webflow = require('webflow-api')
+const token = require('./local-env').WEBFLOW_ACCESSTOKEN
 
-Seneca({ legacy: false })
-  .test()
-  .use('promisify')
-  .use('entity')
-  .use('env', {
-    // debug: true,
-    file: [__dirname + '/local-env.js;?'],
-    var: {
-      $WEBFLOW_ACCESSTOKEN: String,
-    },
-  })
-  .use('provider', {
-    provider: {
-      webflow: {
-        keys: {
-          accesstoken: { value: '$WEBFLOW_ACCESSTOKEN' },
-        },
-      },
-    },
-  })
-  .use('../')
-  .ready(async function () {
-    const seneca = this
+run()
 
-    console.log(await seneca.post('sys:provider,provider:webflow,get:info'))
+async function run() {
+  // initialize the client with the access token
+  const webflow = new Webflow({ token })
 
-    const list = await seneca.entity('provider/webflow/site').list$()
-    console.log(list.slice(0, 3))
-  })
+  const sites = await webflow.sites()
+  console.log(sites)
+}
